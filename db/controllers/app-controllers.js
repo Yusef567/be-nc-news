@@ -1,13 +1,21 @@
-const { getAllTopics } = require("../models/app-models");
-const express = require("express");
+const { getAllTopics, getAllArticles } = require("../models/app-models");
 
 exports.fetchAllTopics = (request, response, next) => {
-  console.log("in the controller");
   getAllTopics()
     .then((topics) => {
       response.status(200).send({ topics });
     })
     .catch((err) => {
-      console.log(err, "this is an error");
+      next(err);
+    });
+};
+
+exports.fetchAllArticles = (request, response, next) => {
+  getAllArticles()
+    .then((articles) => {
+      response.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
     });
 };
