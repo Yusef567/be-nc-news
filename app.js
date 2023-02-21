@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const {
   fetchAllTopics,
+  fetchAllArticles,
   fetchArticleWithId,
 } = require("./db/controllers/app-controllers");
 
@@ -13,9 +14,12 @@ const {
 
 app.get("/api/topics", fetchAllTopics);
 
+app.get("/api/articles", fetchAllArticles);
+
 app.get("/api/articles/:article_id", fetchArticleWithId);
+
 app.all("/*", (req, res) => {
-  res.status(404).send({ msg: "page not found" });
+  res.status(404).send({ msg: "Path not found" });
 });
 
 app.use(handlePSQL400s);
