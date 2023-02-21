@@ -57,4 +57,20 @@ describe.only("GET /api/articles/:article_id", () => {
         });
       });
   });
+  it("400: should respond with Bad Request if passed an invalid article_id", () => {
+    return request(app)
+      .get("/api/articles/theBestArticle")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("404: should respond with a msg article_id not found when passed when passed a valid but non existent article_id", () => {
+    return request(app)
+      .get("/api/articles/100")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article_id not found");
+      });
+  });
 });
