@@ -9,7 +9,7 @@ exports.getAllTopics = () => {
 exports.getAllArticles = () => {
   return db
     .query(
-      `SELECT count(*) 
+      `SELECT CAST(count(*) AS INT)
       AS comment_count,articles.title,articles.topic,articles.author,
       articles.created_at,articles.votes,articles.article_img_url,articles.body,articles.article_id
       FROM comments
