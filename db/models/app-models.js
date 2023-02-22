@@ -44,7 +44,10 @@ exports.postNewComment = (article_id, newComment) => {
     .then(({ rows }) => {
       const addedComment = rows[0];
       if (!addedComment) {
-        return Promise.reject("article_id not found");
+        return Promise.reject({
+          status: 404,
+          msg: "username not found",
+        });
       }
       return addedComment;
     });
