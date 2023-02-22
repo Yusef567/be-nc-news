@@ -1,8 +1,12 @@
 exports.handlePSQL400s = (error, request, response, next) => {
   if (error.code === "22P02") {
     response.status(400).send({ msg: "Bad Request" });
-  } else if (error.code === "23503") {
+  } else if (error.code === "23502") {
+    console.log(error.code);
+    console.log("hi in the psql error");
     response.status(400).send({ msg: "Bad Request" });
+  } else if (error.code === "23503") {
+    response.status(404).send({ msg: "Not Found" });
   } else {
     next(error);
   }
@@ -10,8 +14,6 @@ exports.handlePSQL400s = (error, request, response, next) => {
 
 exports.handleCustomErrors = (error, request, response, next) => {
   if (error === "article_id not found") {
-    response.status(404).send({ msg: error });
-  } else if (error.status === 404 && error.msg === "username not found") {
     response.status(404).send({ msg: error });
   } else {
     next(error);
