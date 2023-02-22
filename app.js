@@ -5,6 +5,7 @@ const {
   fetchAllArticles,
   fetchArticleWithId,
   fetchArticleIdComments,
+  addCommentWithId,
 } = require("./db/controllers/app-controllers");
 
 const {
@@ -12,6 +13,7 @@ const {
   handleCustomErrors,
   hanlde500Errors,
 } = require("./db/controllers/error-controllers");
+app.use(express.json());
 
 app.get("/api/topics", fetchAllTopics);
 
@@ -20,6 +22,8 @@ app.get("/api/articles", fetchAllArticles);
 app.get("/api/articles/:article_id", fetchArticleWithId);
 
 app.get("/api/articles/:article_id/comments", fetchArticleIdComments);
+
+app.post("/api/articles/:article_id/comments", addCommentWithId);
 
 app.all("/*", (req, res) => {
   res.status(404).send({ msg: "Path not found" });

@@ -188,3 +188,107 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("POST /api/articles/:article_id/comments", () => {
+  it("201: should respond with the newly posted comment object with the correct keys and values", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "The first gif was great",
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment).toEqual({
+          comment_id: 19,
+          body: "The first gif was great",
+          article_id: 3,
+          author: "icellusedkars",
+          votes: 0,
+          created_at: expect.any(String),
+        });
+      });
+  });
+  it("201: should ignore any additional properties passed in", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "The first gif was great",
+      comment_id: 30,
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment).toEqual({
+          comment_id: 19,
+          body: "The first gif was great",
+          article_id: 3,
+          author: "icellusedkars",
+          votes: 0,
+          created_at: expect.any(String),
+        });
+      });
+  });
+  it("400: should respond with Bad Request if passed an invalid article_id", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "The first gif was great",
+    };
+
+    return request(app)
+      .post("/api/articles/funnyArticle/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("400: should respond with Bad Request if paseed an object with invalid value types", () => {
+    const newComment = {
+      username: 123,
+      body: "The first gif was great",
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("400: should respond with Bad Request if passed a username that does not exist", () => {
+    const newComment = {
+      username: "northcoder123",
+      body: "The first gif was great",
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("404: should respond with a msg article_id not found when passed when passed a valid but non existent article_id", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "The first gif was great",
+    };
+
+    return request(app)
+      .post("/api/articles/100/comments")
+      .send(newComment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article_id not found");
+      });
+  });
+});
