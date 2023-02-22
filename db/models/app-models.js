@@ -52,14 +52,21 @@ exports.postNewComment = (article_id, newComment) => {
       [body, username, article_id]
     )
     .then(({ rows }) => {
-      console.log("hello");
       const addedComment = rows[0];
-      // if (!addedComment) {
-      //   return Promise.reject({
-      //     status: 404,
-      //     msg: "username not found",
-      //   });
-      // }
       return addedComment;
+    });
+};
+
+exports.updateVotes = (article_id, updatedVotes) => {
+  const { inc_votes } = updatedVotes;
+  return db
+    .query(
+      `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 
+    RETURNING *`,
+      [inc_votes, article_id]
+    )
+    .then(({ rows }) => {
+      const updatedArticle = rows[0];
+      return updatedArticle;
     });
 };

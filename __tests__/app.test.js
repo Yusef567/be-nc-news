@@ -289,3 +289,104 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("PATCH /api/articles/:article_id", () => {
+  it("200: should respond with the updated article with the votes property increased by the number passed", () => {
+    const updatedVotes = {
+      inc_votes: 5,
+    };
+
+    return request(app)
+      .patch("/api/articles/12")
+      .send(updatedVotes)
+      .expect(200)
+      .then(({ body }) => {
+        const { updatedArticle } = body;
+        expect(updatedArticle).toEqual({
+          article_id: 12,
+          title: "Moustache",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "Have you seen the size of that thing?",
+          created_at: "2020-10-11T11:24:00.000Z",
+          votes: 5,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  it("200: should respond with the updated article with the votes property decreased by the number passed", () => {
+    const updatedVotes = {
+      inc_votes: -20,
+    };
+
+    return request(app)
+      .patch("/api/articles/1")
+      .send(updatedVotes)
+      .expect(200)
+      .then(({ body }) => {
+        const { updatedArticle } = body;
+        expect(updatedArticle).toEqual({
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          created_at: "2020-07-09T20:11:00.000Z",
+          votes: 80,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  it("200: should only change the votes property any extra properties should be ignored", () => {
+    const updatedVotes = {
+      inc_votes: -20,
+      topic: "philosophy",
+      author: "Aristotle",
+    };
+
+    return request(app)
+      .patch("/api/articles/1")
+      .send(updatedVotes)
+      .expect(200)
+      .then(({ body }) => {
+        const { updatedArticle } = body;
+        expect(updatedArticle).toEqual({
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          created_at: "2020-07-09T20:11:00.000Z",
+          votes: 80,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  it("400: should respond with Bad Request if passed an invalid article_id", () => {
+    const updatedVotes = {
+      inc_votes: 10,
+    };
+
+    return request(app)
+      .patch("/api/articles/greatArticle")
+      .send(updatedVotes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("400: should repond with Bad Request if passed an empty object", () => {
+    const updatedVotes = {};
+
+    return request(app)
+      .patch("/api/articles/2")
+      .send(updatedVotes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+});
