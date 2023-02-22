@@ -48,17 +48,18 @@ exports.postNewComment = (article_id, newComment) => {
   const { username, body } = newComment;
   return db
     .query(
-      `INSERT INTO comments (body,article_id,author) VALUES ($1,$2,$3) RETURNING *`,
-      [body, article_id, username]
+      `INSERT INTO comments (body,author,article_id) VALUES ($1,$2,$3) RETURNING *`,
+      [body, username, article_id]
     )
     .then(({ rows }) => {
+      console.log("hello");
       const addedComment = rows[0];
-      if (!addedComment) {
-        return Promise.reject({
-          status: 404,
-          msg: "username not found",
-        });
-      }
+      // if (!addedComment) {
+      //   return Promise.reject({
+      //     status: 404,
+      //     msg: "username not found",
+      //   });
+      // }
       return addedComment;
     });
 };

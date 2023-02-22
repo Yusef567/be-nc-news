@@ -249,11 +249,8 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
-  it("400: should respond with Bad Request if paseed an object with invalid value types", () => {
-    const newComment = {
-      username: 123,
-      body: "The first gif was great",
-    };
+  it("400: should repond with Bad Request if passed an empty object", () => {
+    const newComment = {};
 
     return request(app)
       .post("/api/articles/3/comments")
@@ -263,7 +260,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
-  it("400: should respond with Bad Request if passed a username that does not exist", () => {
+  it("404: should respond with username not found if passed a username that does not exist", () => {
     const newComment = {
       username: "northcoder123",
       body: "The first gif was great",
@@ -272,9 +269,9 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/3/comments")
       .send(newComment)
-      .expect(400)
+      .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Bad Request");
+        expect(body.msg).toBe("Not Found");
       });
   });
   it("404: should respond with a msg article_id not found when passed when passed a valid but non existent article_id", () => {
