@@ -119,6 +119,74 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.msg).toBe("article_id not found");
       });
   });
+  it("404: should respond with message of Path not found if passed valid but non existent path", () => {
+    return request(app)
+      .get("/api/aricles/5")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Path not found");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments", () => {
+  it("200: should return an array of comments for the article_id passed with the correct properties", () => {
+    return request(app)
+      .get("/api/articles/9/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments).toBeInstanceOf(Array);
+        expect(comments).toHaveLength(2);
+        comments.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: expect.any(Number),
+          });
+        });
+      });
+  });
+  it("200: response comments array should be ordered by the most recent first", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+  it("200: should respond an empty array and 200 status code if passed an article_id that has no comments", () => {
+    return request(app)
+      .get("/api/articles/12/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments).toBeInstanceOf(Array);
+        expect(comments).toHaveLength(0);
+      });
+  });
+  it("400: should respond with Bad Request if passed an invalid article_id", () => {
+    return request(app)
+      .get("/api/articles/favArticle/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("404: should respond with a msg path not found when passed when passed a valid but non existent article_id", () => {
+    return request(app)
+      .get("/api/articles/100/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article_id not found");
+      });
+  });
 });
 
 describe("POST /api/articles/:article_id/comments", () => {

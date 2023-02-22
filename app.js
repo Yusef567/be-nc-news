@@ -4,6 +4,7 @@ const {
   fetchAllTopics,
   fetchAllArticles,
   fetchArticleWithId,
+  fetchArticleIdComments,
   addCommentWithId,
 } = require("./db/controllers/app-controllers");
 
@@ -19,6 +20,8 @@ app.get("/api/topics", fetchAllTopics);
 app.get("/api/articles", fetchAllArticles);
 
 app.get("/api/articles/:article_id", fetchArticleWithId);
+
+app.get("/api/articles/:article_id/comments", fetchArticleIdComments);
 
 app.post("/api/articles/:article_id/comments", addCommentWithId);
 
