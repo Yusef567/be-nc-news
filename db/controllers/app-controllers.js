@@ -2,6 +2,7 @@ const {
   getAllTopics,
   getAllArticles,
   getArticleWithId,
+  postNewComment,
 } = require("../models/app-models");
 
 exports.fetchAllTopics = (request, response, next) => {
@@ -29,6 +30,21 @@ exports.fetchArticleWithId = (request, response, next) => {
   getArticleWithId(article_id)
     .then((article) => {
       response.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.addCommentWithId = (request, response, next) => {
+  const { article_id } = request.params;
+  const newComment = request.body;
+  const checkArticle = getArticleWithId(article_id);
+  const addComment = postNewComment(article_id, newComment);
+  Promise.all([checkArticle, addComment])
+    .then((commentArr) => {
+      const comment = commentArr[1];
+      response.status(201).send({ comment });
     })
     .catch((err) => {
       next(err);
