@@ -69,12 +69,9 @@ exports.addCommentWithId = (request, response, next) => {
 exports.patchArticleVotes = (request, response, next) => {
   const { article_id } = request.params;
   const updatedVotes = request.body;
-  const checkArticle = getArticleWithId(article_id);
-  const changeVotes = updateVotes(article_id, updatedVotes);
-  Promise.all([checkArticle, changeVotes])
-    .then((articleArr) => {
-      const updatedArticle = articleArr[1];
-      response.status(200).send({ updatedArticle });
+  updateVotes(article_id, updatedVotes)
+    .then((updatedArticle) => {
+      response.status(201).send({ updatedArticle });
     })
     .catch((err) => {
       next(err);

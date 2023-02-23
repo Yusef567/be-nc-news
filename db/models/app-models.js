@@ -67,6 +67,13 @@ exports.updateVotes = (article_id, updatedVotes) => {
     )
     .then(({ rows }) => {
       const updatedArticle = rows[0];
-      return updatedArticle;
+      if (!updatedArticle) {
+        return Promise.reject({
+          status: 404,
+          msg: "article_id not found",
+        });
+      } else {
+        return updatedArticle;
+      }
     });
 };

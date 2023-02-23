@@ -11,7 +11,9 @@ exports.handlePSQL400s = (error, request, response, next) => {
 };
 
 exports.handleCustomErrors = (error, request, response, next) => {
-  if (error === "article_id not found") {
+  if (error.status && error.msg) {
+    response.status(error.status).send({ msg: error.msg });
+  } else if (error === "article_id not found") {
     response.status(404).send({ msg: error });
   } else {
     next(error);

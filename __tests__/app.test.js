@@ -299,7 +299,7 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/12")
       .send(updatedVotes)
-      .expect(200)
+      .expect(201)
       .then(({ body }) => {
         const { updatedArticle } = body;
         expect(updatedArticle).toEqual({
@@ -323,7 +323,7 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/1")
       .send(updatedVotes)
-      .expect(200)
+      .expect(201)
       .then(({ body }) => {
         const { updatedArticle } = body;
         expect(updatedArticle).toEqual({
@@ -349,7 +349,7 @@ describe("PATCH /api/articles/:article_id", () => {
     return request(app)
       .patch("/api/articles/1")
       .send(updatedVotes)
-      .expect(200)
+      .expect(201)
       .then(({ body }) => {
         const { updatedArticle } = body;
         expect(updatedArticle).toEqual({
