@@ -291,7 +291,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-  it("200: should respond with the updated article with the votes property increased by the number passed", () => {
+  it("201: should respond with the updated article with the votes property increased by the number passed", () => {
     const updatedVotes = {
       inc_votes: 5,
     };
@@ -315,7 +315,7 @@ describe("PATCH /api/articles/:article_id", () => {
         });
       });
   });
-  it("200: should respond with the updated article with the votes property decreased by the number passed", () => {
+  it("201: should respond with the updated article with the votes property decreased by the number passed", () => {
     const updatedVotes = {
       inc_votes: -20,
     };
@@ -339,7 +339,7 @@ describe("PATCH /api/articles/:article_id", () => {
         });
       });
   });
-  it("200: should only change the votes property any extra properties should be ignored", () => {
+  it("201: should only change the votes property any extra properties should be ignored", () => {
     const updatedVotes = {
       inc_votes: -20,
       topic: "philosophy",
@@ -387,6 +387,32 @@ describe("PATCH /api/articles/:article_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("400: should respond with Bad Request if passed an object with invalid value types", () => {
+    const updatedVotes = {
+      inc_votes: "add five votes this is great",
+    };
+
+    return request(app)
+      .patch("/api/articles/12")
+      .send(updatedVotes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("404: should respond with with a msg article_id not found when passed when passed a valid but non existent article_id", () => {
+    const updatedVotes = {
+      inc_votes: 10,
+    };
+
+    return request(app)
+      .patch("/api/articles/100")
+      .send(updatedVotes)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article_id not found");
       });
   });
 });
