@@ -6,6 +6,7 @@ const {
   fetchArticleWithId,
   fetchArticleIdComments,
   addCommentWithId,
+  patchArticleVotes,
 } = require("./db/controllers/app-controllers");
 
 const {
@@ -24,6 +25,8 @@ app.get("/api/articles/:article_id", fetchArticleWithId);
 app.get("/api/articles/:article_id/comments", fetchArticleIdComments);
 
 app.post("/api/articles/:article_id/comments", addCommentWithId);
+
+app.patch("/api/articles/:article_id", patchArticleVotes);
 
 app.all("/*", (req, res) => {
   res.status(404).send({ msg: "Path not found" });

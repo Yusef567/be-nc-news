@@ -4,6 +4,7 @@ const {
   getArticleWithId,
   getArticleComments,
   postNewComment,
+  updateVotes,
 } = require("../models/app-models");
 
 exports.fetchAllTopics = (request, response, next) => {
@@ -59,6 +60,21 @@ exports.addCommentWithId = (request, response, next) => {
     .then((commentArr) => {
       const comment = commentArr[1];
       response.status(201).send({ comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.patchArticleVotes = (request, response, next) => {
+  const { article_id } = request.params;
+  const updatedVotes = request.body;
+  const checkArticle = getArticleWithId(article_id);
+  const changeVotes = updateVotes(article_id, updatedVotes);
+  Promise.all([checkArticle, changeVotes])
+    .then((articleArr) => {
+      const updatedArticle = articleArr[1];
+      response.status(200).send({ updatedArticle });
     })
     .catch((err) => {
       next(err);
