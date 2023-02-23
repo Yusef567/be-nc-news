@@ -5,6 +5,7 @@ const {
   getArticleComments,
   postNewComment,
   updateVotes,
+  selectAllUsers,
 } = require("../models/app-models");
 
 exports.fetchAllTopics = (request, response, next) => {
@@ -72,6 +73,16 @@ exports.patchArticleVotes = (request, response, next) => {
   updateVotes(article_id, updatedVotes)
     .then((updatedArticle) => {
       response.status(201).send({ updatedArticle });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.getAllUsers = (request, response, next) => {
+  selectAllUsers()
+    .then((users) => {
+      response.status(200).send({ users });
     })
     .catch((err) => {
       next(err);
