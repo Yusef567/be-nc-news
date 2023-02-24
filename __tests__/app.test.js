@@ -538,3 +538,25 @@ describe("GET /api/users", () => {
       });
   });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+  it("204: should respond with a status code of 204 and no content if passed a valid comment_id", () => {
+    return request(app).delete("/api/comments/1").expect(204);
+  });
+  it("404: shoudl respond with a msg if passed a valid but non existent comment_id", () => {
+    return request(app)
+      .delete("/api/comments/100")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment_id Not Found");
+      });
+  });
+  it("400: should respond with Bad Request if passed an invalid comment_id", () => {
+    return request(app)
+      .delete("/api/comments/badComment")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+});
