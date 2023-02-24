@@ -150,10 +150,10 @@ describe("GET /api/articles", () => {
           expect(articles).toHaveLength(0);
         });
     });
-    it("404: responds with a msg if passed a valid but non exitent column name", () => {
+    it("400: responds with a msg if passed a non exitent column name", () => {
       return request(app)
         .get("/api/articles?sort_by=price")
-        .expect(404)
+        .expect(400)
         .then(({ body }) => {
           expect(body.msg).toBe("Column not found");
         });

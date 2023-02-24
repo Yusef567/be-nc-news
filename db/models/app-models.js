@@ -26,7 +26,7 @@ exports.getAllArticles = (topic, sort_by = "created_at", order = "desc") => {
   const validOrderBy = ["desc", "asc"];
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({
-      status: 404,
+      status: 400,
       msg: "Column not found",
     });
   } else if (!validOrderBy.includes(order)) {
