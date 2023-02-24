@@ -137,3 +137,20 @@ exports.checkTopic = (slug) => {
       return topicFound;
     });
 };
+
+exports.deleteComment = (comment_id) => {
+  return db
+    .query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *`, [
+      comment_id,
+    ])
+    .then(({ rows }) => {
+      const deletedComment = rows[0];
+      if (!deletedComment) {
+        return Promise.reject({
+          status: 404,
+          msg: "Comment_id Not Found",
+        });
+      }
+      return deletedComment;
+    });
+};

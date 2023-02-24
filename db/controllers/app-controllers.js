@@ -7,6 +7,7 @@ const {
   updateVotes,
   selectAllUsers,
   checkTopic,
+  deleteComment,
 } = require("../models/app-models");
 
 exports.fetchAllTopics = (request, response, next) => {
@@ -98,6 +99,17 @@ exports.getAllUsers = (request, response, next) => {
   selectAllUsers()
     .then((users) => {
       response.status(200).send({ users });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.removeCommentWithId = (request, response, next) => {
+  const { comment_id } = request.params;
+  deleteComment(comment_id)
+    .then(() => {
+      response.sendStatus(204);
     })
     .catch((err) => {
       next(err);
