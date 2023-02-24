@@ -46,6 +46,7 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
+        expect(articles).toHaveLength(12);
         expect(articles).toBeInstanceOf(Array);
         articles.forEach((article) => {
           expect(article).toMatchObject({
@@ -80,6 +81,99 @@ describe("GET /api/articles", () => {
       .then(({ body }) => {
         expect(body.msg).toBe("Path not found");
       });
+  });
+  describe("GET  /api/articles?sort_by=queries", () => {
+    it("200: responds with array of object articles with the specified topic in the query", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeInstanceOf(Array);
+          expect(articles).toHaveLength(1);
+          expect(articles[0].topic).toBe("cats");
+        });
+    });
+    it("200: responds with an array of object articles sorted by the specified column", () => {
+      return request(app)
+        .get("/api/articles?sort_by=title&&order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          console.log(articles);
+          expect(articles).toBeInstanceOf(Array);
+          expect(articles).toBeSortedBy("title", {
+            descending: false,
+          });
+        });
+    });
+    it("200: responds with an array of object articles with an order query of asc", () => {
+      return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSortedBy("created_at", {
+            descending: false,
+          });
+        });
+    });
+    it("200: responds with an array of object articles with an order query of desc", () => {
+      return request(app)
+        .get("/api/articles?order=desc")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSortedBy("created_at", {
+            descending: true,
+          });
+        });
+    });
+    it("200: responds with an array of object articles with a default value order descending and sort_by date", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSortedBy("created_at", {
+            descending: true,
+          });
+        });
+    });
+    it("200: should respond with an empty array if passed a topic that exists but not in any article", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeInstanceOf(Array);
+          expect(articles).toHaveLength(0);
+        });
+    });
+    it("404: responds with a msg if passed a valid but non exitent column name", () => {
+      return request(app)
+        .get("/api/articles?sort_by=price")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Column not found");
+        });
+    });
+    it("404: responds with not found if passed a topic that does not exist", () => {
+      return request(app)
+        .get("/api/articles?topic=food")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Not found");
+        });
+    });
+    it("400: should respond with a msg if passed invalid order_by query", () => {
+      return request(app)
+        .get("/api/articles?order=best")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid order query");
+        });
+    });
   });
 });
 

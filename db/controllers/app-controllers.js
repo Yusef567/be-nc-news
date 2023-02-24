@@ -6,6 +6,7 @@ const {
   postNewComment,
   updateVotes,
   selectAllUsers,
+  checkTopic,
 } = require("../models/app-models");
 
 exports.fetchAllTopics = (request, response, next) => {
@@ -19,13 +20,27 @@ exports.fetchAllTopics = (request, response, next) => {
 };
 
 exports.fetchAllArticles = (request, response, next) => {
-  getAllArticles()
-    .then((articles) => {
-      response.status(200).send({ articles });
-    })
-    .catch((err) => {
-      next(err);
-    });
+  const { topic, sort_by, order } = request.query;
+  if (topic) {
+    const validTopic = checkTopic(topic);
+    const articleData = getAllArticles(topic, sort_by, order);
+    Promise.all([validTopic, articleData])
+      .then((articlesArr) => {
+        const articles = articlesArr[1];
+        response.status(200).send({ articles });
+      })
+      .catch((err) => {
+        next(err);
+      });
+  } else {
+    getAllArticles(topic, sort_by, order)
+      .then((articles) => {
+        response.status(200).send({ articles });
+      })
+      .catch((err) => {
+        next(err);
+      });
+  }
 };
 
 exports.fetchArticleWithId = (request, response, next) => {
