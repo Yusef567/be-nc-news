@@ -6,20 +6,52 @@ exports.getAllTopics = () => {
   });
 };
 
-exports.getAllArticles = () => {
-  return db
-    .query(
-      `SELECT CAST(count(*) AS INT)
-      AS comment_count,articles.title,articles.topic,articles.author,
-      articles.created_at,articles.votes,articles.article_img_url,articles.body,articles.article_id
-      FROM comments
-      JOIN articles ON articles.article_id = comments.article_id
-      GROUP BY articles.article_id
-      ORDER BY articles.created_at DESC;`
-    )
-    .then(({ rows }) => {
+exports.getAllArticles = (topic, sort_by = "created_at", order = "desc") => {
+  let queryStr = `SELECT CAST(count(comments) AS INT)
+  AS comment_count,articles.title,articles.topic,articles.author,
+  articles.created_at,articles.votes,articles.article_img_url,articles.body,articles.article_id
+  FROM comments
+  FULL OUTER JOIN articles ON articles.article_id = comments.article_id
+  GROUP BY articles.article_id
+  ORDER BY ${sort_by} ${order}`;
+  const validSortBy = [
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "votes",
+    "article_img_url",
+  ];
+  const validOrderBy = ["desc", "asc"];
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({
+      status: 404,
+      msg: "Column not found",
+    });
+  } else if (!validOrderBy.includes(order)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid order query",
+    });
+  }
+  if (!topic) {
+    return db.query(queryStr).then(({ rows }) => {
       return rows;
     });
+  } else if (topic) {
+    let topicStr = `SELECT CAST(count(comments) AS INT)
+    AS comment_count,articles.title,articles.topic,articles.author,
+    articles.created_at,articles.votes,articles.article_img_url,articles.body,articles.article_id
+    FROM comments
+    FULL OUTER JOIN articles ON articles.article_id = comments.article_id
+    WHERE topic = $1
+    GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order};`;
+    return db.query(topicStr, [topic]).then(({ rows }) => {
+      return rows;
+    });
+  }
 };
 
 exports.getArticleWithId = (article_id) => {
@@ -82,4 +114,19 @@ exports.selectAllUsers = () => {
   return db.query(`SELECT * FROM users`).then(({ rows }) => {
     return rows;
   });
+};
+
+exports.checkTopic = (slug) => {
+  return db
+    .query(`SELECT * FROM topics WHERE slug = $1;`, [slug])
+    .then(({ rows }) => {
+      const topicFound = rows[0];
+      if (!topicFound) {
+        return Promise.reject({
+          status: 404,
+          msg: "Not found",
+        });
+      }
+      return topicFound;
+    });
 };
