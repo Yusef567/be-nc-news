@@ -6,22 +6,109 @@
     "description": "serves an array of all topics",
     "queries": [],
     "exampleResponse": {
-      "topics": [{ "slug": "football", "description": "Footie!" }]
+      "topics": [
+        { "description": "Code is love, code is life", "slug": "coding" },
+        { "description": "FOOTIE!", "slug": "football" },
+        {
+          "description": "Hey good looking, what you got cooking?",
+          "slug": "cooking"
+        }
+      ]
     }
   },
+
   "GET /api/articles": {
     "description": "serves an array of all topics",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
         {
+          "article_id": 3,
           "title": "Seafood substitutions are increasing",
           "topic": "cooking",
           "author": "weegembump",
           "body": "Text from the article..",
-          "created_at": 1527695953341
+          "created_at": "2020-11-07 06:03:00",
+          "comment_count": 10,
+          "votes": 0,
+          "article_img_url": "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?w=700&h=700"
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves an article object",
+    "queries": [],
+    "exampleResponse": {
+      "article_id": 1,
+      "title": "Running a Node App",
+      "topic": "coding",
+      "author": "jessjelly",
+      "created_at": "2020-11-07 06:03:00",
+      "votes": 0,
+      "article_img_url": "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?w=700&h=700",
+      "body": "Text from the article..",
+      "comment_count": 10
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of comments for the article_id passed",
+    "queries": [],
+    "exampleResponse": {
+      "comments": [
+        {
+          "comment_id": 31,
+          "votes": 11,
+          "created_at": "2020-09-26 17:16:00",
+          "author": "weegembump",
+          "body": "Text from the comment...",
+          "article_id": 1
+        }
+      ]
+    }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "responds with the newly posted comment object",
+    "queries": [],
+    "exampleResponse": {
+      "comment_id": 10,
+      "votes": 0,
+      "created_at": "2020-09-26 17:16:00",
+      "author": "weegembump",
+      "body": "Text from the comment...",
+      "article_id": 1
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "respond with the updated article with the new vote count passed in by the client",
+    "queries": [],
+    "exampleResponse": {
+      "article_id": 12,
+      "title": "Moustache",
+      "topic": "mitch",
+      "author": "butter_bridge",
+      "body": "Have you seen the size of that thing?",
+      "created_at": "2020-10-11T11:24:00.000Z",
+      "votes": 5,
+      "article_img_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+    }
+  },
+  "GET /api/users": {
+    "description": "responds with an array of user objects",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "northcoder123",
+          "name": "Alex",
+          "avatar_url": "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        }
+      ]
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "respond with a status code of 204 no content",
+    "queries": [],
+    "exampleResponse": {}
   }
 }

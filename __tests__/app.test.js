@@ -3,6 +3,7 @@ const db = require("../db/connection");
 const app = require("../app");
 const data = require("../db/data/test-data/index");
 const seed = require("../db/seeds/seed");
+const endpointsJson = require("../endpoints.json");
 
 beforeEach(() => {
   return seed(data);
@@ -578,6 +579,18 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad Request");
+      });
+  });
+});
+
+describe("GET /api", () => {
+  it("200: should repond with the endpoints.json data", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {
+        const { apiEndpoints } = body;
+        expect(apiEndpoints).toEqual(endpointsJson);
       });
   });
 });

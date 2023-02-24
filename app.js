@@ -9,6 +9,7 @@ const {
   patchArticleVotes,
   getAllUsers,
   removeCommentWithId,
+  fetchApiEndpoint,
 } = require("./db/controllers/app-controllers");
 
 const {
@@ -34,6 +35,7 @@ app.get("/api/users", getAllUsers);
 
 app.delete("/api/comments/:comment_id", removeCommentWithId);
 
+app.get("/api", fetchApiEndpoint);
 app.all("/*", (req, res) => {
   res.status(404).send({ msg: "Path not found" });
 });

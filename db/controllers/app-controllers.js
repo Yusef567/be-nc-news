@@ -10,6 +10,8 @@ const {
   deleteComment,
 } = require("../models/app-models");
 
+const apiEndpoints = require("../../endpoints.json");
+
 exports.fetchAllTopics = (request, response, next) => {
   getAllTopics()
     .then((topics) => {
@@ -114,4 +116,8 @@ exports.removeCommentWithId = (request, response, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+exports.fetchApiEndpoint = (request, response, next) => {
+  response.status(200).send({ apiEndpoints });
 };
