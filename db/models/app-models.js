@@ -55,15 +55,22 @@ exports.getAllArticles = (topic, sort_by = "created_at", order = "desc") => {
 };
 
 exports.getArticleWithId = (article_id) => {
-  return db
-    .query(`SELECT * FROM articles WHERE article_id = $1;`, [article_id])
-    .then(({ rows }) => {
-      const article = rows[0];
-      if (!article) {
-        return Promise.reject("article_id not found");
-      }
-      return article;
-    });
+  let queryStr = `SELECT CAST(count(comments) AS INT)
+  AS comment_count,articles.title,articles.topic,articles.author,
+  articles.created_at,articles.votes,articles.article_img_url,articles.body,articles.article_id
+  FROM comments
+  FULL OUTER JOIN articles ON articles.article_id = comments.article_id
+  WHERE articles.article_id = $1
+  GROUP BY articles.article_id
+   ORDER BY created_at desc;`;
+
+  return db.query(queryStr, [article_id]).then(({ rows }) => {
+    const article = rows[0];
+    if (!article) {
+      return Promise.reject("article_id not found");
+    }
+    return article;
+  });
 };
 exports.getArticleComments = (article_id) => {
   return db
