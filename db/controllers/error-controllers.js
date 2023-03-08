@@ -5,6 +5,8 @@ exports.handlePSQL400s = (error, request, response, next) => {
     response.status(400).send({ msg: "Bad Request" });
   } else if (error.code === "23503") {
     response.status(404).send({ msg: "Not Found" });
+  } else if (error.code === "23505") {
+    response.status(400).send({ msg: "Bad Request" });
   } else {
     next(error);
   }
@@ -13,8 +15,6 @@ exports.handlePSQL400s = (error, request, response, next) => {
 exports.handleCustomErrors = (error, request, response, next) => {
   if (error.status && error.msg) {
     response.status(error.status).send({ msg: error.msg });
-  } else if (error === "article_id not found") {
-    response.status(404).send({ msg: error });
   } else {
     next(error);
   }
@@ -23,4 +23,8 @@ exports.handleCustomErrors = (error, request, response, next) => {
 exports.hanlde500Errors = (error, request, response, next) => {
   console.log(error);
   response.status(500).send({ msg: "Server Error" });
+};
+
+exports.handlePathNotFound = (request, response) => {
+  response.status(404).send({ msg: "Path not found" });
 };

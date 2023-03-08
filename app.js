@@ -1,46 +1,74 @@
 const express = require("express");
 const app = express();
+
 const {
-  fetchAllTopics,
   fetchAllArticles,
   fetchArticleWithId,
+  patchArticleVotes,
+  postArticle,
+  deleteArticle,
+} = require("./db/controllers/articles-controllers");
+
+const {
+  fetchAllTopics,
+  postTopic,
+} = require("./db/controllers/topics-controllers");
+
+const {
   fetchArticleIdComments,
   addCommentWithId,
-  patchArticleVotes,
-  getAllUsers,
   removeCommentWithId,
+  patchCommentVotes,
+} = require("./db/controllers/comments-controllers");
+
+const {
+  getAllUsers,
+  fetchUser,
+} = require("./db/controllers/users-controllers");
+
+const {
   fetchApiEndpoint,
-} = require("./db/controllers/app-controllers");
+} = require("./db/controllers/api-endpoints-controllers");
 
 const {
   handlePSQL400s,
   handleCustomErrors,
   hanlde500Errors,
+  handlePathNotFound,
 } = require("./db/controllers/error-controllers");
+
 app.use(express.json());
 
-app.get("/api/topics", fetchAllTopics);
+app.route("/api/articles").get(fetchAllArticles).post(postArticle);
 
-app.get("/api/articles", fetchAllArticles);
+app.route("/api/topics").get(fetchAllTopics).post(postTopic);
 
-app.get("/api/articles/:article_id", fetchArticleWithId);
+app
+  .route("/api/articles/:article_id/comments")
+  .get(fetchArticleIdComments)
+  .post(addCommentWithId);
 
-app.get("/api/articles/:article_id/comments", fetchArticleIdComments);
+app
+  .route("/api/articles/:article_id")
+  .get(fetchArticleWithId)
+  .patch(patchArticleVotes)
+  .delete(deleteArticle);
 
-app.post("/api/articles/:article_id/comments", addCommentWithId);
-
-app.patch("/api/articles/:article_id", patchArticleVotes);
+app
+  .route("/api/comments/:comment_id")
+  .patch(patchCommentVotes)
+  .delete(removeCommentWithId);
 
 app.get("/api/users", getAllUsers);
 
-app.delete("/api/comments/:comment_id", removeCommentWithId);
-
 app.get("/api", fetchApiEndpoint);
-app.all("/*", (req, res) => {
-  res.status(404).send({ msg: "Path not found" });
-});
+
+app.get("/api/users/:username", fetchUser);
+
+app.use("/*", handlePathNotFound);
 
 app.use(handlePSQL400s);
 app.use(handleCustomErrors);
 app.use(hanlde500Errors);
+
 module.exports = app;

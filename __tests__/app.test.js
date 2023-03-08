@@ -101,7 +101,6 @@ describe("GET /api/articles", () => {
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
-          console.log(articles);
           expect(articles).toBeInstanceOf(Array);
           expect(articles).toBeSortedBy("title", {
             descending: false,
@@ -164,7 +163,7 @@ describe("GET /api/articles", () => {
         .get("/api/articles?topic=food")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("Not found");
+          expect(body.msg).toBe("Topic Not Found");
         });
     });
     it("400: should respond with a msg if passed invalid order_by query", () => {
@@ -376,7 +375,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad Request");
       });
   });
-  it("404: should respond with username not found if passed a username that does not exist", () => {
+  it("404: should respond with a msg of not found if passed a username that does not exist", () => {
     const newComment = {
       username: "northcoder123",
       body: "The first gif was great",
@@ -591,6 +590,327 @@ describe("GET /api", () => {
       .then(({ body }) => {
         const { apiEndpoints } = body;
         expect(apiEndpoints).toEqual(endpointsJson);
+      });
+  });
+});
+
+describe("GET /api/users/:username", () => {
+  it("200: should respond with a user object with the correct keys and values for the username passed in", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        expect(user).toEqual({
+          username: "butter_bridge",
+          name: "jonny",
+          avatar_url:
+            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+        });
+      });
+  });
+  it("404: should respond with a msg if passed a username that does not exist", () => {
+    return request(app)
+      .get("/api/users/northcoder123")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("user not found");
+      });
+  });
+  it("404: should respond with a msg if passed a non existent path", () => {
+    return request(app)
+      .get("/api/usrs/butter_bridge")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Path not found");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  it("201: should respond with the updated comment object with the votes property increased by the number passed", () => {
+    const updatedVotes = { inc_votes: 6 };
+    return request(app)
+      .patch("/api/comments/2")
+      .send(updatedVotes)
+      .expect(201)
+      .then(({ body }) => {
+        const { updatedComment } = body;
+        expect(updatedComment).toEqual({
+          comment_id: 2,
+          body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+          article_id: 1,
+          author: "butter_bridge",
+          votes: 20,
+          created_at: "2020-10-31T03:03:00.000Z",
+        });
+      });
+  });
+  it("201: should respond with the updated comment object with the votes decreased if passed a negative number", () => {
+    const updatedVotes = { inc_votes: -4 };
+    return request(app)
+      .patch("/api/comments/2")
+      .send(updatedVotes)
+      .expect(201)
+      .then(({ body }) => {
+        const { updatedComment } = body;
+        expect(updatedComment).toEqual({
+          comment_id: 2,
+          body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+          article_id: 1,
+          author: "butter_bridge",
+          votes: 10,
+          created_at: "2020-10-31T03:03:00.000Z",
+        });
+      });
+  });
+  it("201: should only change the votes property any extra properties should be ignored", () => {
+    const updatedVotes = { inc_votes: 10, author: "Peter", article_id: 5 };
+    return request(app)
+      .patch("/api/comments/2")
+      .send(updatedVotes)
+      .expect(201)
+      .then(({ body }) => {
+        const { updatedComment } = body;
+        expect(updatedComment).toEqual({
+          comment_id: 2,
+          body: "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+          article_id: 1,
+          author: "butter_bridge",
+          votes: 24,
+          created_at: "2020-10-31T03:03:00.000Z",
+        });
+      });
+  });
+  it("400: should respond with Bad Request if passed an invalid comment id", () => {
+    const updatedVotes = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/comments/funnyComment")
+      .send(updatedVotes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("400: should respond with Bad Request if passed an object with invalid data type", () => {
+    const updatedVotes = { inc_votes: "add ten votes" };
+    return request(app)
+      .patch("/api/comments/2")
+      .send(updatedVotes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("400: should respond with bad request if passed an empty object", () => {
+    const updatedVotes = {};
+    return request(app)
+      .patch("/api/comments/2")
+      .send(updatedVotes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("404: should respond with a msg of not found if passed a valid but non existent comment_id", () => {
+    const updatedVotes = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/comments/50")
+      .send(updatedVotes)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("comment_id Not Found");
+      });
+  });
+});
+
+describe("POST /api/articles", () => {
+  it("201: should respond with the newly created article with the correct keys and values", () => {
+    const newArticle = {
+      author: "rogersop",
+      title: "The maiden voyage",
+      body: "The first trip of rogers vessel",
+      topic: "mitch",
+      article_img_url:
+        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        const { addedArticle } = body;
+        expect(addedArticle).toEqual({
+          article_id: 13,
+          votes: 0,
+          created_at: expect.any(String),
+          comment_count: 0,
+          author: "rogersop",
+          title: "The maiden voyage",
+          body: "The first trip of rogers vessel",
+          topic: "mitch",
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  it("201: should ignore any additional properties passed in ", () => {
+    const newArticle = {
+      article_id: 20,
+      votes: 10,
+      author: "rogersop",
+      title: "The maiden voyage",
+      body: "The first trip of rogers vessel",
+      topic: "mitch",
+      article_img_url:
+        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        const { addedArticle } = body;
+        expect(addedArticle).toEqual({
+          article_id: 13,
+          votes: 0,
+          created_at: expect.any(String),
+          comment_count: 0,
+          author: "rogersop",
+          title: "The maiden voyage",
+          body: "The first trip of rogers vessel",
+          topic: "mitch",
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        });
+      });
+  });
+  it("400: should respond with Bad Request if passed an object with missing properties", () => {
+    const newArticle = {
+      author: "rogersop",
+      body: "The first trip of rogers vessel",
+      topic: "mitch",
+      article_img_url:
+        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("404: should respond with a msg of not found if passed an object with a valid but non existent author or topic", () => {
+    const newArticle = {
+      author: "Alex",
+      title: "The maiden voyage",
+      body: "The first trip of rogers vessel",
+      topic: "sailing",
+      article_img_url:
+        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not Found");
+      });
+  });
+});
+
+describe("POST /api/topics", () => {
+  it("201: should respond with the newly created topic object", () => {
+    const newTopic = {
+      slug: "Sailing",
+      description: "Fair winds and following seas",
+    };
+
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        const { addedTopic } = body;
+        expect(addedTopic).toEqual({
+          slug: "Sailing",
+          description: "Fair winds and following seas",
+        });
+      });
+  });
+  it("201: should ignore any additional properties passed in", () => {
+    const newTopic = {
+      slug: "Sailing",
+      description: "Fair winds and following seas",
+      author: "rogersop",
+      title: "The maiden voyage",
+      body: "The first trip of rogers vessel",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        const { addedTopic } = body;
+        expect(addedTopic).toEqual({
+          slug: "Sailing",
+          description: "Fair winds and following seas",
+        });
+      });
+  });
+  it("400: should respond with Bad Request if passed an object with out a slug and description", () => {
+    const newTopic = {};
+
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("400: should respond with Bad Request if passed a topic that already exists", () => {
+    const newTopic = {
+      slug: "mitch",
+      description: "The man, the Mitch, the legend",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+});
+
+describe("DELETE /api/articles/:article_id", () => {
+  it("204: should respond with a status code of 204 if passed a valid article_id with that has no comments", () => {
+    return request(app).delete("/api/articles/12").expect(204);
+  });
+  it("204: if passed an article_id that has comments should delete comments associated with the article_id as well as the article (delete from both tables)", () => {
+    return request(app).delete("/api/articles/1").expect(204);
+  });
+  it("400: should respond with Bad Request if passed an invalid article_id", () => {
+    return request(app)
+      .delete("/api/articles/badArticle")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad Request");
+      });
+  });
+  it("404: should respond with a msg if passed a valid but non existent article_id", () => {
+    return request(app)
+      .delete("/api/articles/100")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article_id Not Found");
       });
   });
 });
