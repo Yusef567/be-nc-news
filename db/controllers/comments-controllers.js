@@ -7,8 +7,9 @@ const {
 } = require("../models/comments-models");
 exports.fetchArticleIdComments = (request, response, next) => {
   const { article_id } = request.params;
+  const { limit, page } = request.query;
   const checkArticle = getArticleWithId(article_id);
-  const getComments = getArticleComments(article_id);
+  const getComments = getArticleComments(article_id, limit, page);
   Promise.all([checkArticle, getComments])
     .then((commentsArr) => {
       const comments = commentsArr[1];

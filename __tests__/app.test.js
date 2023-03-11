@@ -47,7 +47,7 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
-        expect(articles).toHaveLength(12);
+        expect(articles).toHaveLength(10);
         expect(articles).toBeInstanceOf(Array);
         articles.forEach((article) => {
           expect(article).toMatchObject({
@@ -172,6 +172,84 @@ describe("GET /api/articles", () => {
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).toBe("Invalid order query");
+        });
+    });
+  });
+  describe("GET /api/articles?pagination", () => {
+    it("200: should respond with the correct amount of articles when passed limit", () => {
+      return request(app)
+        .get("/api/articles?limit=5")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toHaveLength(5);
+        });
+    });
+    it("200: should default to a limit of 10 if not passed one", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toHaveLength(10);
+        });
+    });
+    it("200: should respond with the appropriate articles when passed a topic and a limit", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch&limit=5")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toHaveLength(5);
+          articles.forEach((article) => {
+            expect(article.topic).toBe("mitch");
+          });
+        });
+    });
+    it("400: should respond a msg and bad request if passed an invalid limit", () => {
+      return request(app)
+        .get("/api/articles?limit=all")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid limit query");
+        });
+    });
+    it("200: should respond with the correct amount of articles when passed page", () => {
+      return request(app)
+        .get("/api/articles?limit=10&page=1")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toHaveLength(10);
+          expect(articles[0].article_id).toBe(3);
+          expect(articles[9].article_id).toBe(8);
+        });
+    });
+    it("200: should return the following sequence of article object when passed same limit and the following page(page 2)", () => {
+      return request(app)
+        .get("/api/articles?limit=10&page=2")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toHaveLength(2);
+        });
+    });
+    it("200: should respond with an empty array if passed a page number which does not exist(too high)", () => {
+      return request(app)
+        .get("/api/articles?limit=10&page=3")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeInstanceOf(Array);
+          expect(articles).toHaveLength(0);
+        });
+    });
+    it("400: should respond with a msg and bad request if passed an invalid page", () => {
+      return request(app)
+        .get("/api/articles?limit=10&page=first")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid page query");
         });
     });
   });
@@ -301,6 +379,63 @@ describe("GET /api/articles/:article_id/comments", () => {
       .then(({ body }) => {
         expect(body.msg).toBe("article_id not found");
       });
+  });
+  describe("GET /api/articles/:article_id/comments(pagination)", () => {
+    it("200: shouuld respond with correct amount of comments when passed a limit", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=5")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments).toHaveLength(5);
+        });
+    });
+    it("200: should default to a limit of 10 if not passed one", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments).toHaveLength(10);
+        });
+    });
+    it("400: should should respond a msg and bad request if passed an invalid limit", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=none")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid limit query");
+        });
+    });
+    it("200: should respond with the correct amount of comments when passed page query", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=5&page=2")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments).toHaveLength(5);
+          expect(comments[0].comment_id).toBe(8);
+          expect(comments[4].comment_id).toBe(4);
+        });
+    });
+    it("200: should respond with an empty array if passed a page number which does not exist(too high)", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=5&page=4")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments).toBeInstanceOf(Array);
+          expect(comments).toHaveLength(0);
+        });
+    });
+    it("400: should respond with a msg and bad request if passed an invalid page", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=5&page=lastPage")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid page query");
+        });
+    });
   });
 });
 

@@ -8,10 +8,10 @@ const {
 } = require("../models/article-models");
 
 exports.fetchAllArticles = (request, response, next) => {
-  const { topic, sort_by, order } = request.query;
+  const { topic, sort_by, order, limit, page } = request.query;
   if (topic) {
     const validTopic = checkTopic(topic);
-    const articleData = getAllArticles(topic, sort_by, order);
+    const articleData = getAllArticles(topic, sort_by, order, limit, page);
     Promise.all([validTopic, articleData])
       .then((articlesArr) => {
         const articles = articlesArr[1];
@@ -21,7 +21,7 @@ exports.fetchAllArticles = (request, response, next) => {
         next(err);
       });
   } else {
-    getAllArticles(topic, sort_by, order)
+    getAllArticles(topic, sort_by, order, limit, page)
       .then((articles) => {
         response.status(200).send({ articles });
       })

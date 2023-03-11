@@ -1,13 +1,20 @@
 const db = require("../connection");
 
-exports.getAllArticles = (topic, sort_by = "created_at", order = "desc") => {
+exports.getAllArticles = (
+  topic,
+  sort_by = "created_at",
+  order = "desc",
+  limit = "10",
+  page = "1"
+) => {
   let queryStr = `SELECT CAST(count(comments) AS INT)
     AS comment_count,articles.title,articles.topic,articles.author,
     articles.created_at,articles.votes,articles.article_img_url,articles.body,articles.article_id
     FROM comments
-    FULL OUTER JOIN articles ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id
+    FULL OUTER JOIN articles ON articles.article_id = comments.article_id`;
+  let str2 = ` GROUP BY articles.article_id
     ORDER BY ${sort_by} ${order}`;
+  const queryParams = [];
   const validSortBy = [
     "title",
     "topic",
@@ -18,6 +25,9 @@ exports.getAllArticles = (topic, sort_by = "created_at", order = "desc") => {
     "article_img_url",
   ];
   const validOrderBy = ["desc", "asc"];
+  const isNumber = /^[0-9]{1,}$/;
+  const offSet = (page - 1) * limit;
+
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({
       status: 400,
@@ -29,23 +39,28 @@ exports.getAllArticles = (topic, sort_by = "created_at", order = "desc") => {
       msg: "Invalid order query",
     });
   }
-  if (!topic) {
-    return db.query(queryStr).then(({ rows }) => {
-      return rows;
+  if (topic) {
+    queryStr += ` WHERE topic = $1`;
+    queryParams.push(topic);
+  }
+  queryStr += str2;
+
+  if (isNumber.test(limit) && isNumber.test(page)) {
+    queryStr += ` LIMIT ${limit} OFFSET ${offSet}`;
+  } else if (!isNumber.test(limit)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid limit query",
     });
-  } else if (topic) {
-    let topicStr = `SELECT CAST(count(comments) AS INT)
-      AS comment_count,articles.title,articles.topic,articles.author,
-      articles.created_at,articles.votes,articles.article_img_url,articles.body,articles.article_id
-      FROM comments
-      FULL OUTER JOIN articles ON articles.article_id = comments.article_id
-      WHERE topic = $1
-      GROUP BY articles.article_id
-      ORDER BY ${sort_by} ${order};`;
-    return db.query(topicStr, [topic]).then(({ rows }) => {
-      return rows;
+  } else if (!isNumber.test(page)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid page query",
     });
   }
+  return db.query(queryStr, queryParams).then(({ rows }) => {
+    return rows;
+  });
 };
 
 exports.getArticleWithId = (article_id) => {

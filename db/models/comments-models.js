@@ -1,14 +1,26 @@
 const db = require("../connection");
 
-exports.getArticleComments = (article_id) => {
-  return db
-    .query(
-      `SELECT * FROM comments WHERE article_id = $1 ORDER BY comments.created_at DESC;`,
-      [article_id]
-    )
-    .then(({ rows }) => {
-      return rows;
+exports.getArticleComments = (article_id, limit = "10", page = "1") => {
+  let queryStr = `SELECT * FROM comments WHERE article_id = $1 ORDER BY comments.created_at DESC`;
+  const isNumber = /^[0-9]{1,}$/;
+  const offSet = (page - 1) * limit;
+
+  if (isNumber.test(limit) && isNumber.test(page)) {
+    queryStr += ` LIMIT ${limit} OFFSET ${offSet}`;
+  } else if (!isNumber.test(limit)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid limit query",
     });
+  } else if (!isNumber.test(page)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Invalid page query",
+    });
+  }
+  return db.query(queryStr, [article_id]).then(({ rows }) => {
+    return rows;
+  });
 };
 
 exports.postNewComment = (article_id, newComment) => {
@@ -20,6 +32,12 @@ exports.postNewComment = (article_id, newComment) => {
     )
     .then(({ rows }) => {
       const addedComment = rows[0];
+      if (!addedComment) {
+        return Promise.reject({
+          status: 404,
+          msg: "article_id not found",
+        });
+      }
       return addedComment;
     });
 };

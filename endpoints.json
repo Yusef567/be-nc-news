@@ -17,7 +17,7 @@
     }
   },
   "GET /api/articles": {
-    "description": "Responds with an object containing array of all the articles. Can filter by topic (/api/articles?topic=cats), can be sorted by columns(/api/articles?sort_by=title),can be ordered by asc or desc(/api/articles?order=desc)",
+    "description": "Responds with an object containing array of all the articles. Can filter by topic (/api/articles?topic=cats), can be sorted by columns(/api/articles?sort_by=title),can be ordered by asc or desc(/api/articles?order=desc),accepts pagination query(limit default 10 and page default 1)",
     "queries": [
       {
         "columns": [
@@ -74,7 +74,7 @@
     }
   },
   "GET /api/articles/:article_id/comments": {
-    "description": "Responds with an object containing an array of comments for the article_id(must be an interger) passed in ",
+    "description": "Responds with an object containing an array of comments for the article_id(must be an interger) passed in,accepts pagination query(limit default 10 and page default 1) ",
     "queries": [],
     "exampleResponse": {
       "comments": [
