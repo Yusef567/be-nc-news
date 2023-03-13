@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-
+const cors = require("cors");
 const {
   fetchAllArticles,
   fetchArticleWithId,
@@ -36,6 +36,8 @@ const {
   hanlde500Errors,
   handlePathNotFound,
 } = require("./db/controllers/error-controllers");
+
+app.use(cors());
 
 app.use(express.json());
 
