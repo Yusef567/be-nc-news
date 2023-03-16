@@ -23,6 +23,7 @@ exports.getAllArticles = (
     "created_at",
     "votes",
     "article_img_url",
+    "comment_count",
   ];
   const validOrderBy = ["desc", "asc"];
   const isNumber = /^[0-9]{1,}$/;
